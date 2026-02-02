@@ -1,0 +1,12 @@
+node_modules/
+dist/
+apps/api/data/
+.screenshots/
+test-results/
+playwright-report/
+*.log
+!logs/*.log
+
+# Claude Code personal overrides
+.claude/settings.local.json
+CLAUDE.local.md
