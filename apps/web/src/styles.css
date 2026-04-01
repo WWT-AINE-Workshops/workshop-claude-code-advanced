@@ -1,0 +1,94 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #d9dde3;
+  --text: #1c2430;
+  --muted: #5b6676;
+  --accent: #b5562b;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+body {
+  margin: 0;
+}
+header.top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+header.top .brand {
+  font-weight: 700;
+  color: var(--accent);
+}
+header.top nav {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+header.top .user-switcher {
+  max-width: 100%;
+}
+header.top .user-switcher select {
+  max-width: 100%;
+}
+header.top a {
+  color: var(--text);
+  text-decoration: none;
+}
+header.top a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+main {
+  padding: 24px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+}
+th,
+td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: #e8ebf0;
+}
+.badge[data-status='approved'],
+.badge[data-status='fulfilled'] {
+  background: #dff3e4;
+}
+.badge[data-status='rejected'] {
+  background: #fbe1df;
+}
+.badge[data-status='pending'] {
+  background: #fff2cc;
+}
+.pagination {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+.error {
+  color: #a4262c;
+}
+form.stack {
+  display: grid;
+  gap: 12px;
+  max-width: 480px;
+}
