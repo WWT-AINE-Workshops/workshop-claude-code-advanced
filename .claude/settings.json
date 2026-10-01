@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm run test *)", "Bash(npm run lint)", "Bash(git status)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/format.mjs"]
+          }
+        ]
+      }
+    ]
+  }
+}

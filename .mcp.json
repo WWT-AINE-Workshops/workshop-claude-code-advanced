@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "copperline-db": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["tools/db-mcp/dist/index.js"]
+    }
+  }
+}
