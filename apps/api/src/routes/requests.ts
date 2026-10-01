@@ -1,4 +1,4 @@
-import type { RequestStatus, User } from '@copperline/shared';
+import { REQUEST_STATUSES, type RequestStatus, type User } from '@copperline/shared';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { AppDeps } from '../app';
@@ -12,12 +12,14 @@ import {
   getUserRow,
   insertEvent,
   listPendingForApprover,
+  listRequestEvents,
   listVisibleRequests,
 } from '../repo';
 
 const ListQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(REQUEST_STATUSES).optional(),
 });
 
 const CreateBody = z.object({
@@ -64,8 +66,14 @@ export function requestRoutes(app: FastifyInstance, deps: AppDeps): void {
   };
 
   app.get('/api/requests', async (request) => {
-    const { page, pageSize } = ListQuery.parse(request.query);
-    return listVisibleRequests(db, request.user, page, pageSize);
+    const { page, pageSize, status } = ListQuery.parse(request.query);
+    return listVisibleRequests(db, request.user, page, pageSize, status);
+  });
+
+  app.get<{ Params: { id: string } }>('/api/requests/:id/events', async (request) => {
+    const id = toId(request.params.id);
+    requireVisible(db, request.user, id);
+    return listRequestEvents(db, id);
   });
 
   app.get<{ Params: { id: string } }>('/api/requests/:id', async (request) => {

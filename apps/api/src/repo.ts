@@ -3,6 +3,7 @@ import type {
   EquipmentRequest,
   Item,
   Page,
+  RequestEvent,
   RequestStatus,
   Role,
   User,
@@ -136,18 +137,21 @@ export function listVisibleRequests(
   user: User,
   page: number,
   pageSize: number,
+  status?: RequestStatus,
 ): Page<EquipmentRequest> {
   const v = visibility(user);
+  const where = status ? `${v.sql} AND r.status = ?` : v.sql;
+  const params = status ? [...v.params, status] : v.params;
   const total = db
-    .prepare(`SELECT COUNT(*) FROM requests r JOIN users u ON u.id = r.requester_id WHERE ${v.sql}`)
+    .prepare(`SELECT COUNT(*) FROM requests r JOIN users u ON u.id = r.requester_id WHERE ${where}`)
     .pluck()
-    .get(...v.params) as number;
+    .get(...params) as number;
   const rows = db
     .prepare(
       `SELECT r.* FROM requests r JOIN users u ON u.id = r.requester_id
-       WHERE ${v.sql} ORDER BY r.created_at DESC, r.id DESC LIMIT ? OFFSET ?`,
+       WHERE ${where} ORDER BY r.created_at DESC, r.id DESC LIMIT ? OFFSET ?`,
     )
-    .all(...v.params, pageSize, (page - 1) * pageSize) as RequestRow[];
+    .all(...params, pageSize, (page - 1) * pageSize) as RequestRow[];
   const items = rows.map((row) =>
     toRequestDto(row, getItemRow(db, row.item_id)!, getUserRow(db, row.requester_id)!),
   );
@@ -181,4 +185,35 @@ export function insertEvent(
   db.prepare(
     'INSERT INTO request_events (request_id, actor_id, from_status, to_status, note, created_at) VALUES (?, ?, ?, ?, ?, ?)',
   ).run(e.requestId, e.actorId, e.from, e.to, e.note, e.at);
+}
+
+interface EventRow {
+  id: number;
+  request_id: number;
+  actor_id: number;
+  actor_name: string;
+  from_status: RequestStatus | null;
+  to_status: RequestStatus;
+  note: string | null;
+  created_at: string;
+}
+
+export function listRequestEvents(db: Db, requestId: number): RequestEvent[] {
+  const rows = db
+    .prepare(
+      `SELECT e.id, e.request_id, e.actor_id, u.name AS actor_name, e.from_status, e.to_status, e.note, e.created_at
+       FROM request_events e JOIN users u ON u.id = e.actor_id
+       WHERE e.request_id = ? ORDER BY e.created_at ASC, e.id ASC`,
+    )
+    .all(requestId) as EventRow[];
+  return rows.map((r) => ({
+    id: r.id,
+    requestId: r.request_id,
+    actorId: r.actor_id,
+    actorName: r.actor_name,
+    fromStatus: r.from_status,
+    toStatus: r.to_status,
+    note: r.note,
+    createdAt: r.created_at,
+  }));
 }
