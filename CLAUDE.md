@@ -30,3 +30,7 @@ Internal IT equipment request portal. npm workspaces monorepo, TypeScript everyw
 ## Not app code
 
 `workshop/`, `logs/` and `scripts/` are workshop material. Don't change them unless asked.
+
+## When compacting
+
+Always keep the full list of files you modified and the exact test commands you ran.
