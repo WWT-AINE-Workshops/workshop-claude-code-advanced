@@ -1,0 +1,5 @@
+feature	0e8a16	New capability
+bug	d73a4a	Something is not working
+ui	1d76db	Front-end layout or styling
+api	5319e7	REST API
+workshop	fbca04	Used in the Claude Code workshop
