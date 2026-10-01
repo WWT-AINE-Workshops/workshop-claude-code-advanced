@@ -126,10 +126,18 @@ export function requestRoutes(app: FastifyInstance, deps: AppDeps): void {
 
     const at = new Date().toISOString();
     db.transaction(() => {
-      db.prepare('UPDATE items SET stock = stock - ? WHERE id = ?').run(row.qty, item.id);
-      db.prepare(
-        "UPDATE requests SET status = 'approved', approved_unit_cost_cents = ?, updated_at = ? WHERE id = ?",
-      ).run(price.unitCostCents, at, id);
+      const taken = db
+        .prepare('UPDATE items SET stock = stock - ? WHERE id = ? AND stock >= ?')
+        .run(row.qty, item.id, row.qty);
+      if (taken.changes === 0) {
+        throw conflict(`Only ${getItemRow(db, item.id)!.stock} of ${item.name} in stock`);
+      }
+      const decided = db
+        .prepare(
+          "UPDATE requests SET status = 'approved', approved_unit_cost_cents = ?, updated_at = ? WHERE id = ? AND status = 'pending'",
+        )
+        .run(price.unitCostCents, at, id);
+      if (decided.changes === 0) throw conflict(`Request ${id} is no longer pending`);
       insertEvent(db, {
         requestId: id,
         actorId: request.user.id,
