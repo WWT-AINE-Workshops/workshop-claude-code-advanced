@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { AppDeps } from '../app';
 import { notFound, toId } from '../errors';
 import { getItemRow, listItems, toItem } from '../repo';
+import { searchItems } from '../search';
 
 const ListQuery = z.object({ q: z.string().trim().max(100).optional() });
 
@@ -11,7 +12,7 @@ export function itemRoutes(app: FastifyInstance, deps: AppDeps): void {
 
   app.get('/api/items', async (request) => {
     const { q } = ListQuery.parse(request.query);
-    return listItems(db, q);
+    return q ? searchItems(db, q) : listItems(db);
   });
 
   app.get<{ Params: { id: string } }>('/api/items/:id', async (request) => {

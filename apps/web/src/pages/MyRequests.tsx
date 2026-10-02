@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
@@ -6,7 +6,16 @@ import { useAsync } from '../useAsync';
 
 export function MyRequests() {
   const [page, setPage] = useState(1);
-  const { data, error, reload } = useAsync(() => api.requests(page), [page]);
+  const [search, setSearch] = useState('');
+  const [q, setQ] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setQ(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
+  const { data, error, reload } = useAsync(() => api.requests(page, 10, q || undefined), [page, q]);
   if (error) return <p className="error">{error}</p>;
   if (!data) return <p>Loading…</p>;
 
@@ -18,6 +27,13 @@ export function MyRequests() {
   return (
     <>
       <h1>Requests</h1>
+      <input
+        type="search"
+        aria-label="Search requests"
+        placeholder="Search by item or justification"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <table data-testid="requests-table">
         <thead>
           <tr>

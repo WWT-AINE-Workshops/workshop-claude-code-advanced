@@ -14,10 +14,12 @@ import {
   listPendingForApprover,
   listVisibleRequests,
 } from '../repo';
+import { searchRequests } from '../search';
 
 const ListQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  q: z.string().trim().min(1).max(100).optional(),
 });
 
 const CreateBody = z.object({
@@ -64,7 +66,8 @@ export function requestRoutes(app: FastifyInstance, deps: AppDeps): void {
   };
 
   app.get('/api/requests', async (request) => {
-    const { page, pageSize } = ListQuery.parse(request.query);
+    const { page, pageSize, q } = ListQuery.parse(request.query);
+    if (q) return searchRequests(db, q, page, pageSize);
     return listVisibleRequests(db, request.user, page, pageSize);
   });
 
